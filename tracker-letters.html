@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LetterTrack — Letters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f7f4;
+      --bg2: #f2efe9;
+      --surface: #ffffff;
+      --border: #e4dfd6;
+      --border2: #d4cec4;
+      --ink: #1a1714;
+      --ink2: #3d3830;
+      --muted: #7a7368;
+      --light: #a89e92;
+      --crimson: #b8001a;
+      --crimson-soft: rgba(184,0,26,0.08);
+      --crimson-ring: rgba(184,0,26,0.18);
+      --gold: #b8882a;
+      --gold-soft: rgba(184,136,42,0.1);
+      --gold-bright: #d4a843;
+      --teal: #0d8a6a;
+      --teal-soft: rgba(13,138,106,0.1);
+      --amber: #b86000;
+      --amber-soft: rgba(184,96,0,0.1);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Geist', system-ui, sans-serif;
+      --font-mono: 'Geist Mono', monospace;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-md: 0 6px 28px rgba(0,0,0,0.09);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(249,247,244,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 32px; height: 32px; background: var(--crimson); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
+    .brand span { color: var(--crimson); }
+    .topbar-nav { display: flex; align-items: center; gap: 8px; }
+    .nav-pill { font-size: 13px; font-weight: 500; color: var(--muted); padding: 7px 14px; border-radius: 100px; border: 1px solid transparent; text-decoration: none; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .nav-pill:hover { color: var(--ink); background: var(--bg2); border-color: var(--border); }
+    .nav-pill.active { color: var(--crimson); background: var(--crimson-soft); border-color: var(--crimson-ring); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── PAGE ── */
+    .page { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 28px; animation: fadeUp 0.5s ease both;
+    }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(26px, 4vw, 40px); font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .btn-primary { background: var(--crimson); color: white; padding: 10px 22px; border-radius: var(--radius-sm); border: none; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all 0.2s; box-shadow: 0 2px 12px var(--crimson-ring); }
+    .btn-primary:hover { background: #9a0016; transform: translateY(-1px); box-shadow: 0 6px 20px var(--crimson-ring); }
+    .btn-outline { background: var(--surface); color: var(--ink2); padding: 10px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border2); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; transition: all 0.2s; }
+    .btn-outline:hover { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-soft); }
+
+    /* ── DRAWER (Add/Edit form) ── */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(26,23,20,0.5); z-index: 500;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(3px);
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 600;
+      width: min(520px, 100vw);
+      background: var(--surface);
+      box-shadow: var(--shadow-lg);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .drawer-header h2 { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); }
+    .drawer-close {
+      width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg2); color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      transition: all 0.2s;
+    }
+    .drawer-close:hover { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-soft); }
+
+    .drawer-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
+    .drawer-body::-webkit-scrollbar { width: 4px; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .drawer-footer {
+      padding: 18px 28px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; justify-content: flex-end;
+      flex-shrink: 0; background: var(--bg2);
+    }
+
+    /* ── FORM ── */
+    .form-section-title {
+      font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--light);
+      margin: 20px 0 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .form-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .form-section-title:first-child { margin-top: 0; }
+
+    .form-grid { display: grid; gap: 14px; }
+    .form-grid.g2 { grid-template-columns: 1fr 1fr; }
+    .form-grid.g2 .span2 { grid-column: 1 / -1; }
+    @media (max-width: 480px) { .form-grid.g2 { grid-template-columns: 1fr; } .form-grid.g2 .span2 { grid-column: 1; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); padding: 11px 14px;
+      font-family: var(--font-body); font-size: 14px; color: var(--ink);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      appearance: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--crimson); background: white;
+      box-shadow: 0 0 0 3px var(--crimson-ring);
+    }
+    .field input::placeholder { color: var(--light); }
+    .field textarea { min-height: 80px; resize: vertical; }
+
+    /* Status toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--bg2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); }
+    .toggle-label { font-size: 14px; font-weight: 500; color: var(--ink2); }
+    .toggle-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .toggle-switch { position: relative; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 12px;
+      background: var(--border2); cursor: pointer; transition: background 0.25s;
+    }
+    .toggle-track::before {
+      content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+      background: white; top: 3px; left: 3px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform 0.25s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--teal); }
+    .toggle-switch input:checked + .toggle-track::before { transform: translateX(20px); }
+
+    /* Priority select styled */
+    .priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .priority-opt { display: none; }
+    .priority-opt + label {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 8px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+      background: var(--bg2); cursor: pointer; font-size: 12px; font-weight: 600;
+      color: var(--muted); transition: all 0.2s; text-align: center;
+    }
+    .priority-opt + label i { font-size: 16px; }
+    .priority-opt[value="Low"] + label:hover { border-color: var(--teal); color: var(--teal); }
+    .priority-opt[value="Medium"] + label:hover { border-color: var(--amber); color: var(--amber); }
+    .priority-opt[value="High"] + label:hover { border-color: var(--crimson); color: var(--crimson); }
+    .priority-opt[value="Low"]:checked + label { border-color: var(--teal); color: var(--teal); background: var(--teal-soft); }
+    .priority-opt[value="Medium"]:checked + label { border-color: var(--amber); color: var(--amber); background: var(--amber-soft); }
+    .priority-opt[value="High"]:checked + label { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-soft); }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 16px; animation: fadeUp 0.5s 0.08s ease both;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--light); font-size: 14px; pointer-events: none; }
+    .search-input {
+      width: 100%; padding: 10px 14px 10px 38px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 14px; color: var(--ink);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px var(--crimson-ring); }
+    .search-input::placeholder { color: var(--light); }
+
+    .filter-select {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-family: var(--font-body); font-size: 13px; color: var(--ink2);
+      outline: none; cursor: pointer; transition: border-color 0.2s;
+      appearance: none; min-width: 130px;
+    }
+    .filter-select:focus { border-color: var(--crimson); }
+
+    .count-badge {
+      font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+      padding: 6px 12px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 100px; white-space: nowrap;
+    }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+      animation: fadeUp 0.5s 0.12s ease both;
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    thead th {
+      padding: 12px 16px; text-align: left;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.09em; color: var(--light);
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: var(--ink2); }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted .sort-icon { opacity: 1; color: var(--crimson); }
+
+    tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--ink2); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.15s; }
+    tbody tr:hover td { background: var(--bg2); }
+    tbody tr.replied-row td { opacity: 0.6; }
+
+    .recipient-cell { display: flex; flex-direction: column; gap: 2px; min-width: 140px; }
+    .recipient-name { font-weight: 600; color: var(--ink); font-size: 13.5px; }
+    .recipient-sub { font-family: var(--font-mono); font-size: 11px; color: var(--light); }
+
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-overdue { background: rgba(220,38,38,0.1); color: #dc2626; }
+    .badge-soon { background: var(--amber-soft); color: var(--amber); }
+    .badge-ok { background: var(--teal-soft); color: var(--teal); }
+    .badge-replied { background: var(--gold-soft); color: var(--gold); }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .priority-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+    .priority-high { background: var(--crimson-soft); color: var(--crimson); }
+    .priority-medium { background: var(--amber-soft); color: var(--amber); }
+    .priority-low { background: var(--teal-soft); color: var(--teal); }
+
+    .days-cell { font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
+    .days-overdue { color: #dc2626; }
+    .days-soon { color: var(--amber); }
+    .days-ok { color: var(--teal); }
+
+    /* Actions */
+    .row-actions { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+    .icon-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: 1px solid transparent;
+      background: transparent; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 13px;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--bg2); border-color: var(--border); color: var(--ink); }
+    .icon-btn.edit:hover { color: var(--gold); border-color: rgba(184,136,42,0.3); background: var(--gold-soft); }
+    .icon-btn.reply:hover { color: var(--teal); border-color: rgba(13,138,106,0.3); background: var(--teal-soft); }
+    .icon-btn.del:hover { color: #dc2626; border-color: rgba(220,38,38,0.2); background: rgba(220,38,38,0.06); }
+
+    /* Empty state */
+    .empty-state { padding: 64px 24px; text-align: center; }
+    .empty-icon { font-size: 40px; color: var(--border2); margin-bottom: 14px; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--muted); margin-bottom: 6px; font-family: var(--font-display); }
+    .empty-sub { font-size: 13px; color: var(--light); margin-bottom: 20px; }
+
+    /* ── VIEW MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(26,23,20,0.5);
+      z-index: 700; display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+      width: min(620px, 100%); max-height: 90vh; overflow-y: auto;
+      transform: scale(0.95); transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal-box { transform: scale(1); }
+    .modal-box::-webkit-scrollbar { width: 4px; }
+    .modal-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .modal-header {
+      padding: 22px 26px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); }
+    .modal-body { padding: 24px 26px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 500px) { .modal-grid { grid-template-columns: 1fr; } }
+    .modal-field label { font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--light); display: block; margin-bottom: 5px; }
+    .modal-field p { font-size: 14px; color: var(--ink2); font-weight: 500; }
+    .modal-field.full { grid-column: 1 / -1; }
+    .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; background: var(--bg2); border-radius: 0 0 var(--radius) var(--radius); }
+
+    /* ── TOAST ── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--ink); color: white; padding: 12px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow-lg); animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .toast i { color: var(--gold-bright); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .topbar { padding: 0 16px; }
+      .page { padding: 20px 12px 60px; }
+      .nav-pill span { display: none; }
+      .header-actions .btn-outline { display: none; }
+      tbody td:nth-child(4), tbody td:nth-child(7) { display: none; }
+      thead th:nth-child(4), thead th:nth-child(7) { display: none; }
+    }
+
+    .footer { text-align: center; padding: 32px 0; font-size: 13px; color: var(--light); position: relative; z-index: 1; }
+    .footer a { color: var(--crimson); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="tracker-index.html" class="brand">
+    <div class="brand-icon"><i class="bi bi-envelope-paper"></i></div>
+    Letter<span>Track</span>
+  </a>
+  <div class="topbar-nav">
+    <a href="tracker-index.html" class="nav-pill"><i class="bi bi-grid-1x2"></i> <span>Dashboard</span></a>
+    <a href="tracker-letters.html" class="nav-pill active"><i class="bi bi-envelope"></i> <span>Letters</span></a>
+    <button class="btn-primary" onclick="openDrawer()"><i class="bi bi-plus"></i> New Letter</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1>All Letters</h1>
+      <p>Add, search, filter and manage every correspondence in one place.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline" onclick="exportCSV()"><i class="bi bi-download"></i> Export CSV</button>
+      <button class="btn-primary" onclick="openDrawer()"><i class="bi bi-plus"></i> New Letter</button>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="bi bi-search"></i>
+      <input class="search-input" id="searchBox" placeholder="Search recipient, subject, reference, officer…" oninput="renderTable()">
+    </div>
+    <select class="filter-select" id="filterStatus" onchange="renderTable()">
+      <option value="">All Statuses</option>
+      <option value="overdue">Overdue</option>
+      <option value="soon">Due Soon</option>
+      <option value="ok">On Track</option>
+      <option value="replied">Replied</option>
+    </select>
+    <select class="filter-select" id="filterWorkspace" onchange="renderTable()">
+      <option value="">All Workspaces</option>
+      <option>Tax Authority</option>
+      <option>Legal</option>
+      <option>HR</option>
+      <option>Finance</option>
+      <option>General</option>
+    </select>
+    <select class="filter-select" id="filterPriority" onchange="renderTable()">
+      <option value="">All Priorities</option>
+      <option>High</option>
+      <option>Medium</option>
+      <option>Low</option>
+    </select>
+    <div class="count-badge" id="countBadge">0 letters</div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('recipient')">Recipient <span class="sort-icon"><i class="bi bi-chevron-expand"></i></span></th>
+            <th onclick="sortBy('subject')">Subject <span class="sort-icon"><i class="bi bi-chevron-expand"></i></span></th>
+            <th onclick="sortBy('ref')">Reference</th>
+            <th onclick="sortBy('workspace')">Workspace</th>
+            <th onclick="sortBy('dateIssued')">Issued <span class="sort-icon"><i class="bi bi-chevron-expand"></i></span></th>
+            <th onclick="sortBy('dueDate')">Due Date <span class="sort-icon"><i class="bi bi-chevron-expand"></i></span></th>
+            <th>Days Left</th>
+            <th>Priority</th>
+            <th onclick="sortBy('officer')">Officer</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="letterTableBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="empty-icon"><i class="bi bi-envelope-open"></i></div>
+      <div class="empty-title">No letters found</div>
+      <div class="empty-sub" id="emptySubText">Click the button below to add your first letter</div>
+      <button class="btn-primary" onclick="openDrawer()"><i class="bi bi-plus"></i> Add First Letter</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2 id="drawerTitle">New Letter</h2>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="bi bi-x"></i></button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="editId">
+
+    <div class="form-section-title">Recipient Details</div>
+    <div class="form-grid g2">
+      <div class="field span2">
+        <label>Recipient / Taxpayer / Person *</label>
+        <input id="f-recipient" type="text" placeholder="Full name or company" required>
+      </div>
+      <div class="field">
+        <label>Reference / ID / TIN</label>
+        <input id="f-ref" type="text" placeholder="e.g. TIN-123456">
+      </div>
+      <div class="field">
+        <label>Workspace</label>
+        <select id="f-workspace">
+          <option>Tax Authority</option>
+          <option>Legal</option>
+          <option>HR</option>
+          <option>Finance</option>
+          <option selected>General</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">Letter Details</div>
+    <div class="form-grid g2">
+      <div class="field span2">
+        <label>Subject / Brief *</label>
+        <input id="f-subject" type="text" placeholder="What is this letter about?">
+      </div>
+      <div class="field">
+        <label>Date Issued *</label>
+        <input id="f-dateIssued" type="date">
+      </div>
+      <div class="field">
+        <label>Response Due Date *</label>
+        <input id="f-dueDate" type="date">
+      </div>
+      <div class="field">
+        <label>Issuing Officer</label>
+        <input id="f-officer" type="text" placeholder="Officer name">
+      </div>
+      <div class="field">
+        <label>Department / Team</label>
+        <input id="f-department" type="text" placeholder="e.g. Audit Division">
+      </div>
+      <div class="field span2">
+        <label>Notes / Additional Info</label>
+        <textarea id="f-notes" placeholder="Any extra context, notes, or instructions…"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section-title">Priority</div>
+    <div class="priority-grid">
+      <div>
+        <input class="priority-opt" type="radio" name="priority" id="p-low" value="Low">
+        <label for="p-low"><i class="bi bi-arrow-down-circle"></i> Low</label>
+      </div>
+      <div>
+        <input class="priority-opt" type="radio" name="priority" id="p-med" value="Medium" checked>
+        <label for="p-med"><i class="bi bi-dash-circle"></i> Medium</label>
+      </div>
+      <div>
+        <input class="priority-opt" type="radio" name="priority" id="p-high" value="High">
+        <label for="p-high"><i class="bi bi-arrow-up-circle"></i> High</label>
+      </div>
+    </div>
+
+    <div class="form-section-title">Status</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Marked as Replied</div>
+        <div class="toggle-sub">Toggle on once a response has been received</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="f-replied">
+        <div class="toggle-track"></div>
+      </label>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-outline" onclick="closeDrawer()">Cancel</button>
+    <button class="btn-primary" onclick="saveLetter()"><i class="bi bi-check-lg"></i> <span id="saveLabel">Dispatch Letter</span></button>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="vm-subject">Letter Details</h3>
+      <button class="drawer-close" onclick="closeViewModal()"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div class="modal-field"><label>Recipient</label><p id="vm-recipient">—</p></div>
+        <div class="modal-field"><label>Reference / TIN</label><p id="vm-ref">—</p></div>
+        <div class="modal-field"><label>Workspace</label><p id="vm-workspace">—</p></div>
+        <div class="modal-field"><label>Priority</label><p id="vm-priority">—</p></div>
+        <div class="modal-field"><label>Date Issued</label><p id="vm-issued">—</p></div>
+        <div class="modal-field"><label>Due Date</label><p id="vm-due">—</p></div>
+        <div class="modal-field"><label>Issuing Officer</label><p id="vm-officer">—</p></div>
+        <div class="modal-field"><label>Department</label><p id="vm-dept">—</p></div>
+        <div class="modal-field"><label>Status</label><p id="vm-status">—</p></div>
+        <div class="modal-field"><label>Days Remaining</label><p id="vm-days">—</p></div>
+        <div class="modal-field full"><label>Notes</label><p id="vm-notes" style="white-space:pre-wrap">—</p></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeViewModal()">Close</button>
+      <button class="btn-primary" id="vm-edit-btn"><i class="bi bi-pencil"></i> Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<div class="footer">LetterTrack by <a href="#">Taxpromin</a> · <a href="https://honeyman234.github.io/Safehouse/" target="_blank">Safe House Digital Professionals</a> · <a href="https://wa.me/2349064103161">WhatsApp</a></div>
+
+<script>
+  // ── STORAGE ──
+  function getLetters() { try { return JSON.parse(localStorage.getItem('lt_letters') || '[]'); } catch { return []; } }
+  function saveLetters(d) { localStorage.setItem('lt_letters', JSON.stringify(d)); }
+  function getActivity() { try { return JSON.parse(localStorage.getItem('lt_activity') || '[]'); } catch { return []; } }
+  function addActivity(type, icon, title, sub) {
+    const acts = getActivity();
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    acts.unshift({ type, icon, title, sub, time });
+    if (acts.length > 50) acts.pop();
+    localStorage.setItem('lt_activity', JSON.stringify(acts));
+  }
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+  function escapeHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function daysUntil(d) {
+    if (!d) return null;
+    const now = new Date(); now.setHours(0,0,0,0);
+    const due = new Date(d + 'T00:00:00');
+    return Math.round((due - now) / 86400000);
+  }
+  function getStatus(l) {
+    if (l.replied) return 'replied';
+    const d = daysUntil(l.dueDate);
+    if (d === null) return 'ok';
+    if (d < 0) return 'overdue';
+    if (d <= 7) return 'soon';
+    return 'ok';
+  }
+  function statusBadge(l) {
+    const s = getStatus(l); const days = daysUntil(l.dueDate);
+    if (s==='replied') return `<span class="badge badge-replied"><span class="badge-dot"></span>Replied</span>`;
+    if (s==='overdue') return `<span class="badge badge-overdue"><span class="badge-dot"></span>Overdue</span>`;
+    if (s==='soon')    return `<span class="badge badge-soon"><span class="badge-dot"></span>Due Soon</span>`;
+    return `<span class="badge badge-ok"><span class="badge-dot"></span>On Track</span>`;
+  }
+  function daysCell(l) {
+    if (l.replied) return `<span class="days-cell" style="color:var(--gold)">Done</span>`;
+    const d = daysUntil(l.dueDate);
+    if (d === null) return '—';
+    if (d < 0) return `<span class="days-cell days-overdue">${Math.abs(d)}d ago</span>`;
+    if (d === 0) return `<span class="days-cell days-overdue">Today!</span>`;
+    if (d <= 7) return `<span class="days-cell days-soon">${d}d</span>`;
+    return `<span class="days-cell days-ok">${d}d</span>`;
+  }
+  function priorityTag(p) {
+    if (p==='High') return `<span class="priority-tag priority-high"><i class="bi bi-arrow-up"></i>${p}</span>`;
+    if (p==='Low')  return `<span class="priority-tag priority-low"><i class="bi bi-arrow-down"></i>${p}</span>`;
+    return `<span class="priority-tag priority-medium"><i class="bi bi-dash"></i>${p||'Med'}</span>`;
+  }
+
+  // ── SORT STATE ──
+  let sortKey = 'dueDate', sortDir = 1;
+  function sortBy(key) {
+    if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+    document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+    renderTable();
+  }
+
+  // ── RENDER TABLE ──
+  function renderTable() {
+    let letters = getLetters();
+    const q = document.getElementById('searchBox').value.toLowerCase();
+    const fs = document.getElementById('filterStatus').value;
+    const fw = document.getElementById('filterWorkspace').value;
+    const fp = document.getElementById('filterPriority').value;
+
+    if (q) letters = letters.filter(l =>
+      [l.recipient, l.subject, l.ref, l.officer, l.department, l.notes, l.workspace]
+      .some(v => (v||'').toLowerCase().includes(q))
+    );
+    if (fs) letters = letters.filter(l => getStatus(l) === fs);
+    if (fw) letters = letters.filter(l => (l.workspace||'General') === fw);
+    if (fp) letters = letters.filter(l => (l.priority||'Medium') === fp);
+
+    letters.sort((a,b) => {
+      let av = a[sortKey]||'', bv = b[sortKey]||'';
+      return av < bv ? -sortDir : av > bv ? sortDir : 0;
+    });
+
+    document.getElementById('countBadge').textContent = `${letters.length} letter${letters.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('letterTableBody');
+    const empty = document.getElementById('emptyState');
+
+    if (!letters.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      document.getElementById('emptySubText').textContent = q || fs || fw || fp
+        ? 'No letters match your filters. Try adjusting your search.'
+        : 'Click the button below to add your first letter.';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = letters.map(l => `
+      <tr class="${l.replied ? 'replied-row' : ''}">
+        <td><div class="recipient-cell">
+          <span class="recipient-name">${escapeHtml(l.recipient)}</span>
+          <span class="recipient-sub">${escapeHtml(l.ref || '—')}</span>
+        </div></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(l.subject)}">${escapeHtml(l.subject)}</td>
+        <td><span style="font-family:var(--font-mono);font-size:11px;color:var(--light)">${escapeHtml(l.ref||'—')}</span></td>
+        <td><span style="font-size:12px;font-weight:500;color:var(--muted)">${escapeHtml(l.workspace||'General')}</span></td>
+        <td><span style="font-family:var(--font-mono);font-size:12px">${formatDate(l.dateIssued)}</span></td>
+        <td><span style="font-family:var(--font-mono);font-size:12px">${formatDate(l.dueDate)}</span></td>
+        <td>${daysCell(l)}</td>
+        <td>${priorityTag(l.priority)}</td>
+        <td style="font-size:13px">${escapeHtml(l.officer||'—')}</td>
+        <td>${statusBadge(l)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" title="View" onclick="viewLetter('${l.id}')"><i class="bi bi-eye"></i></button>
+            <button class="icon-btn edit" title="Edit" onclick="editLetter('${l.id}')"><i class="bi bi-pencil"></i></button>
+            <button class="icon-btn reply" title="${l.replied ? 'Mark Pending' : 'Mark Replied'}" onclick="toggleReply('${l.id}')"><i class="bi bi-${l.replied ? 'arrow-counterclockwise' : 'check-lg'}"></i></button>
+            <button class="icon-btn del" title="Delete" onclick="deleteLetter('${l.id}')"><i class="bi bi-trash3"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  // ── DRAWER ──
+  function openDrawer(resetId = true) {
+    if (resetId) {
+      document.getElementById('editId').value = '';
+      document.getElementById('drawerTitle').textContent = 'New Letter';
+      document.getElementById('saveLabel').textContent = 'Dispatch Letter';
+      document.getElementById('f-recipient').value = '';
+      document.getElementById('f-ref').value = '';
+      document.getElementById('f-subject').value = '';
+      document.getElementById('f-dateIssued').value = new Date().toISOString().slice(0,10);
+      document.getElementById('f-dueDate').value = '';
+      document.getElementById('f-officer').value = '';
+      document.getElementById('f-department').value = '';
+      document.getElementById('f-notes').value = '';
+      document.getElementById('f-workspace').value = 'General';
+      document.getElementById('f-replied').checked = false;
+      document.querySelector('input[name="priority"][value="Medium"]').checked = true;
+    }
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('f-recipient').focus(), 350);
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── SAVE ──
+  function saveLetter() {
+    const recipient = document.getElementById('f-recipient').value.trim();
+    const subject   = document.getElementById('f-subject').value.trim();
+    const dateIssued = document.getElementById('f-dateIssued').value;
+    const dueDate   = document.getElementById('f-dueDate').value;
+
+    if (!recipient || !subject || !dateIssued || !dueDate) {
+      showToast('Please fill in all required fields', 'exclamation-circle'); return;
+    }
+
+    const letters = getLetters();
+    const editId  = document.getElementById('editId').value;
+    const priority = document.querySelector('input[name="priority"]:checked')?.value || 'Medium';
+    const isNew = !editId;
+
+    const data = {
+      id: editId || uid(),
+      recipient, subject, dateIssued, dueDate, priority,
+      ref:        document.getElementById('f-ref').value.trim(),
+      officer:    document.getElementById('f-officer').value.trim(),
+      department: document.getElementById('f-department').value.trim(),
+      notes:      document.getElementById('f-notes').value.trim(),
+      workspace:  document.getElementById('f-workspace').value,
+      replied:    document.getElementById('f-replied').checked,
+      createdAt:  editId ? (letters.find(l=>l.id===editId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+      updatedAt:  new Date().toISOString(),
+    };
+
+    if (isNew) {
+      letters.unshift(data);
+      addActivity('new', 'envelope-plus', `New: ${recipient}`, subject);
+      showToast('Letter dispatched!', 'check-circle-fill');
+    } else {
+      const idx = letters.findIndex(l => l.id === editId);
+      if (idx > -1) letters[idx] = data;
+      addActivity('edit', 'pencil', `Edited: ${recipient}`, subject);
+      showToast('Letter updated!', 'check-circle-fill');
+    }
+
+    saveLetters(letters);
+    closeDrawer();
+    renderTable();
+  }
+
+  // ── EDIT ──
+  function editLetter(id) {
+    const l = getLetters().find(l => l.id === id);
+    if (!l) return;
+    document.getElementById('editId').value = l.id;
+    document.getElementById('drawerTitle').textContent = 'Edit Letter';
+    document.getElementById('saveLabel').textContent = 'Save Changes';
+    document.getElementById('f-recipient').value = l.recipient || '';
+    document.getElementById('f-ref').value = l.ref || '';
+    document.getElementById('f-subject').value = l.subject || '';
+    document.getElementById('f-dateIssued').value = l.dateIssued || '';
+    document.getElementById('f-dueDate').value = l.dueDate || '';
+    document.getElementById('f-officer').value = l.officer || '';
+    document.getElementById('f-department').value = l.department || '';
+    document.getElementById('f-notes').value = l.notes || '';
+    document.getElementById('f-workspace').value = l.workspace || 'General';
+    document.getElementById('f-replied').checked = !!l.replied;
+    const pEl = document.querySelector(`input[name="priority"][value="${l.priority||'Medium'}"]`);
+    if (pEl) pEl.checked = true;
+    openDrawer(false);
+  }
+
+  // ── VIEW ──
+  function viewLetter(id) {
+    const l = getLetters().find(l => l.id === id);
+    if (!l) return;
+    document.getElementById('vm-subject').textContent = l.subject || 'Letter Details';
+    document.getElementById('vm-recipient').textContent = l.recipient || '—';
+    document.getElementById('vm-ref').textContent = l.ref || '—';
+    document.getElementById('vm-workspace').textContent = l.workspace || '—';
+    document.getElementById('vm-priority').textContent = l.priority || '—';
+    document.getElementById('vm-issued').textContent = formatDate(l.dateIssued);
+    document.getElementById('vm-due').textContent = formatDate(l.dueDate);
+    document.getElementById('vm-officer').textContent = l.officer || '—';
+    document.getElementById('vm-dept').textContent = l.department || '—';
+    document.getElementById('vm-notes').textContent = l.notes || '—';
+    const d = daysUntil(l.dueDate);
+    document.getElementById('vm-days').textContent = l.replied ? 'Replied ✓' : d === null ? '—' : d < 0 ? `${Math.abs(d)} days overdue` : d === 0 ? 'Due Today!' : `${d} days remaining`;
+    document.getElementById('vm-status').textContent = l.replied ? 'Replied' : getStatus(l) === 'overdue' ? 'Overdue' : getStatus(l) === 'soon' ? 'Due Soon' : 'On Track';
+    document.getElementById('vm-edit-btn').onclick = () => { closeViewModal(); editLetter(id); };
+    document.getElementById('viewModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeViewModal() {
+    document.getElementById('viewModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('viewModal').addEventListener('click', e => { if (e.target === document.getElementById('viewModal')) closeViewModal(); });
+
+  // ── DELETE ──
+  function deleteLetter(id) {
+    const letters = getLetters();
+    const l = letters.find(l => l.id === id);
+    if (!l || !confirm(`Delete letter to "${l.recipient}"?`)) return;
+    saveLetters(letters.filter(x => x.id !== id));
+    addActivity('done', 'trash3', `Deleted: ${l.recipient}`, l.subject);
+    showToast('Letter deleted', 'trash3');
+    renderTable();
+  }
+
+  // ── TOGGLE REPLY ──
+  function toggleReply(id) {
+    const letters = getLetters();
+    const l = letters.find(l => l.id === id);
+    if (!l) return;
+    l.replied = !l.replied;
+    saveLetters(letters);
+    addActivity('done', l.replied ? 'check-circle' : 'arrow-counterclockwise', `${l.replied ? 'Replied' : 'Reopened'}: ${l.recipient}`, l.subject);
+    showToast(l.replied ? 'Marked as replied ✓' : 'Marked as pending', 'check-circle-fill');
+    renderTable();
+  }
+
+  // ── EXPORT ──
+  function exportCSV() {
+    const letters = getLetters();
+    if (!letters.length) { showToast('No letters to export', 'exclamation-circle'); return; }
+    const header = ['Recipient','Reference','Subject','Workspace','Priority','Date Issued','Due Date','Officer','Department','Replied','Notes'];
+    const rows = letters.map(l => header.map((h,i) => {
+      const keys = ['recipient','ref','subject','workspace','priority','dateIssued','dueDate','officer','department'];
+      const v = i < 9 ? (l[keys[i]]||'') : i===9 ? (l.replied?'Yes':'No') : (l.notes||'');
+      return `"${String(v).replace(/"/g,'""')}"`;
+    }).join(','));
+    const csv = [header.join(','), ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `letters-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    showToast('Exported!', 'download');
+  }
+
+  // ── TOAST ──
+  function showToast(msg, icon = 'check-circle-fill') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<i class="bi bi-${icon}"></i> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // ── KEYBOARD ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeDrawer(); closeViewModal(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('searchBox').focus(); }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+    // Check for ?new=1 param
+    if (new URLSearchParams(location.search).get('new') === '1') openDrawer();
+  });
+</script>
+</body>
+</html>
